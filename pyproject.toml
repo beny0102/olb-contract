@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "olb-contract"
+version = "0.1.0"
+description = "Canonical event and telemetry contract for Open League Baseball"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+keywords = ["baseball", "scorekeeping", "json-schema", "pydantic"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+  "pydantic>=2.8",
+  "jsonschema>=4.22",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "datamodel-code-generator>=0.30",
+]
+
+[project.urls]
+Homepage = "https://github.com/beny0102/olb"
+Documentation = "https://github.com/beny0102/olb/blob/main/docs/vision.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["generated/python/olb_contract"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+pythonpath = ["generated/python"]

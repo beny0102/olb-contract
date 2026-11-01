@@ -1,0 +1,37 @@
+{
+  "name": "@olb/contract",
+  "version": "0.1.0",
+  "description": "Canonical event and telemetry contract for Open League Baseball",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "generated/ts",
+    "src",
+    "fixtures",
+    "schema",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.mjs"
+    },
+    "./types": "./generated/ts/event.d.ts",
+    "./schema/*": "./dist/schema/*"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs && node --test test/*.test.mjs",
+    "check": "node scripts/build.mjs && git diff --exit-code -- dist generated"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "json-schema-to-typescript": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=20.10"
+  }
+}

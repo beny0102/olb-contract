@@ -1,0 +1,12 @@
+{
+  "contract": "olb.track/1",
+  "id": "0192f3a3-0004-7000-8000-000000000004",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "kind": "pitch",
+  "source": "sim",
+  "clock": { "type": "synthetic", "epoch": "2026-04-11T23:41:06.000Z" },
+  "frame": "field",
+  "samples": [{ "t": 0.0, "p": [0.31, 1.42, 1.52] }],
+  "model": { "name": "godot-sim", "version": "4.5.0" },
+  "quality": { "rms": 0, "inliers": 1, "cameras": 1 }
+}

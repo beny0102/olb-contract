@@ -1,0 +1,20 @@
+{
+  "type": "snapshot",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 148,
+  "state": {
+    "status": "live",
+    "inning": 3,
+    "half": "top",
+    "outs": 1,
+    "count": { "balls": 1, "strikes": 2 },
+    "bases": {
+      "first": "0192f3a2-0002-7000-8000-000000000011",
+      "second": null,
+      "third": null
+    },
+    "score": { "home": 2, "away": 1 },
+    "battingTeam": "away",
+    "lastSeq": 148
+  }
+}

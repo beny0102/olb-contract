@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:olb:v1:track",
+  "title": "Track",
+  "description": "Spatial telemetry for one object over one contiguous time window. Tracks are referenced by events and never rewrite them. Only the pitch kind is in scope for v1.",
+  "type": "object",
+  "required": [
+    "contract",
+    "id",
+    "gameId",
+    "kind",
+    "source",
+    "clock",
+    "frame",
+    "samples",
+    "model",
+    "quality"
+  ],
+  "properties": {
+    "contract": {
+      "type": "string",
+      "const": "olb.track/1"
+    },
+    "id": {
+      "$ref": "#/$defs/uuid"
+    },
+    "gameId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "pitch",
+        "batted_ball",
+        "player",
+        "bat"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "vision",
+        "sim",
+        "import"
+      ],
+      "description": "Tracks cannot claim human provenance: a human does not produce samples."
+    },
+    "clock": {
+      "type": "object",
+      "description": "The time base the samples are expressed in. Frames are never assumed to be evenly spaced.",
+      "required": [
+        "type",
+        "epoch"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "synthetic",
+            "ntp",
+            "monotonic"
+          ]
+        },
+        "epoch": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "rate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Nominal samples per second. Informational only."
+        },
+        "syncErrorMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Measured clock error across cameras, in milliseconds. Absent means unknown."
+        }
+      }
+    },
+    "frame": {
+      "type": "string",
+      "pattern": "^(field|camera:[a-z0-9-]{1,32})$",
+      "description": "`field` means the canonical coordinate system. `camera:<id>` means uncalibrated 2D image coordinates."
+    },
+    "samples": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20000,
+      "items": {
+        "type": "object",
+        "required": [
+          "t",
+          "p",
+          "sigma"
+        ],
+        "properties": {
+          "t": {
+            "type": "number",
+            "description": "Seconds since the clock epoch."
+          },
+          "p": {
+            "$ref": "#/$defs/vec3"
+          },
+          "sigma": {
+            "$ref": "#/$defs/nonNegativeVec3"
+          }
+        }
+      }
+    },
+    "fit": {
+      "type": "object",
+      "description": "Derived summary of the samples. Absent when the raw samples are insufficient to fit.",
+      "required": [
+        "model"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "release": {
+          "$ref": "#/$defs/vec3"
+        },
+        "plate": {
+          "$ref": "#/$defs/vec3"
+        },
+        "speedMph": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 120
+        },
+        "spinRpm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 6000
+        },
+        "breakIn": {
+          "type": "number",
+          "description": "Horizontal break in metres, positive toward first base."
+        },
+        "breakVert": {
+          "type": "number",
+          "description": "Vertical break in metres, positive upward, relative to a gravity-only path."
+        }
+      }
+    },
+    "model": {
+      "type": "object",
+      "description": "Producer identification. Required so that a bad model version is traceable.",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "required": [
+        "rms",
+        "inliers",
+        "cameras"
+      ],
+      "properties": {
+        "rms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "RMS of the trajectory fit, in metres."
+        },
+        "inliers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cameras": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "calibrationId": {
+          "type": "string",
+          "maxLength": 80
+        }
+      }
+    }
+  },
+  "$defs": {
+    "nonNegativeVec3": {
+      "type": "array",
+      "description": "Per-axis uncertainty in metres. Non-negative.",
+      "items": {
+        "type": "number",
+        "minimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp with an explicit offset. UTC (Z) is preferred."
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "UUIDv7: time-ordered, lowercase, RFC 9562. v4 identifiers are rejected on purpose so that the log stays sortable by creation time."
+    },
+    "vec3": {
+      "type": "array",
+      "description": "A point or vector in metres, in the field coordinate system.",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}

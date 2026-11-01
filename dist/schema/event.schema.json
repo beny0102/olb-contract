@@ -1,0 +1,896 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:olb:v1:event",
+  "title": "Event",
+  "description": "One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.",
+  "oneOf": [
+    {
+      "title": "GameStartEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "game.start"
+            },
+            "payload": {
+              "$ref": "#/$defs/GameStartPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "GameEndEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "game.end"
+            },
+            "payload": {
+              "$ref": "#/$defs/GameEndPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "LineupSetEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "lineup.set"
+            },
+            "payload": {
+              "$ref": "#/$defs/LineupSetPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "SubstitutionEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "substitution"
+            },
+            "payload": {
+              "$ref": "#/$defs/SubstitutionPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "PitchEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "pitch"
+            },
+            "payload": {
+              "$ref": "#/$defs/PitchPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "BallInPlayEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ball_in_play"
+            },
+            "payload": {
+              "$ref": "#/$defs/BallInPlayPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "RunnerEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "runner"
+            },
+            "payload": {
+              "$ref": "#/$defs/RunnerPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "InningEndEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "inning.end"
+            },
+            "payload": {
+              "$ref": "#/$defs/InningEndPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "DiscrepancyEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "discrepancy"
+            },
+            "payload": {
+              "$ref": "#/$defs/DiscrepancyPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "AmendmentEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "amendment"
+            },
+            "payload": {
+              "$ref": "#/$defs/AmendmentPayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    },
+    {
+      "title": "NoteEvent",
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "note"
+            },
+            "payload": {
+              "$ref": "#/$defs/NotePayload"
+            }
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "AmendmentPayload": {
+      "type": "object",
+      "required": [
+        "targetSeq",
+        "reason"
+      ],
+      "properties": {
+        "targetSeq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "data_entry",
+            "rule_misapplication",
+            "official_scoring",
+            "video_review",
+            "other"
+          ]
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "replacement": {}
+      }
+    },
+    "BallInPlayPayload": {
+      "type": "object",
+      "required": [
+        "batter",
+        "code",
+        "runsBattedIn"
+      ],
+      "properties": {
+        "batter": {
+          "$ref": "#/$defs/uuid"
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9()/.,+\\-*#!? ]+$",
+          "description": "Retrosheet-style event code with modifiers, e.g. S8, D7/L, HR/F, E5/G, FC6."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "fielders": {
+          "type": "array",
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "required": [
+              "player",
+              "role"
+            ],
+            "properties": {
+              "player": {
+                "$ref": "#/$defs/uuid"
+              },
+              "position": {
+                "$ref": "#/$defs/fieldingPosition"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "assist",
+                  "putout",
+                  "error"
+                ]
+              }
+            }
+          }
+        },
+        "runsBattedIn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "runnersAdvanced": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": [
+              "player",
+              "from",
+              "to"
+            ],
+            "properties": {
+              "player": {
+                "$ref": "#/$defs/uuid"
+              },
+              "from": {
+                "type": "string",
+                "enum": [
+                  "1",
+                  "2",
+                  "3",
+                  "B"
+                ]
+              },
+              "to": {
+                "type": "string",
+                "enum": [
+                  "1",
+                  "2",
+                  "3",
+                  "B",
+                  "H"
+                ]
+              },
+              "on": {
+                "type": "string",
+                "enum": [
+                  "hit",
+                  "error",
+                  "walk",
+                  "sacrifice",
+                  "steal",
+                  "wild_pitch",
+                  "passed_ball",
+                  "balk",
+                  "other"
+                ]
+              }
+            }
+          }
+        },
+        "trackRef": {
+          "$ref": "#/$defs/uuid"
+        },
+        "raw": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Verbatim input as received, retained so a parser bug is recoverable without re-watching video."
+        }
+      }
+    },
+    "DiscrepancyPayload": {
+      "type": "object",
+      "required": [
+        "targetSeq",
+        "field",
+        "status"
+      ],
+      "properties": {
+        "targetSeq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "humanValue": {},
+        "machineValue": {},
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "resolved"
+          ]
+        },
+        "resolution": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "Envelope": {
+      "type": "object",
+      "description": "Fields present on every event, regardless of type.",
+      "required": [
+        "contract",
+        "id",
+        "gameId",
+        "seq",
+        "occurredAt",
+        "recordedAt",
+        "source",
+        "actor"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string",
+          "const": "olb.event/1"
+        },
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "gameId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Dense, gap-free, assigned by the single writer holding the game lock."
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "recordedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "actor": {
+          "$ref": "#/$defs/actor"
+        },
+        "revisionOf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Set when this event corrects an earlier one. The original is never mutated."
+        }
+      }
+    },
+    "GameEndPayload": {
+      "type": "object",
+      "required": [
+        "reason",
+        "finalScore"
+      ],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "forfeit",
+            "suspended",
+            "rain",
+            "darkness",
+            "other"
+          ]
+        },
+        "finalScore": {
+          "$ref": "#/$defs/score"
+        }
+      }
+    },
+    "GameStartPayload": {
+      "type": "object",
+      "properties": {
+        "venue": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "fieldCondition": {
+          "type": "string",
+          "enum": [
+            "dry",
+            "wet",
+            "unknown"
+          ]
+        },
+        "umpires": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 120
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "plate",
+                  "first",
+                  "second",
+                  "third",
+                  "left",
+                  "right"
+                ]
+              }
+            }
+          }
+        },
+        "startedAt": {
+          "$ref": "#/$defs/timestamp"
+        }
+      }
+    },
+    "InningEndPayload": {
+      "type": "object",
+      "required": [
+        "inning",
+        "half",
+        "runsScored",
+        "outs"
+      ],
+      "properties": {
+        "inning": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "half": {
+          "$ref": "#/$defs/halfInning"
+        },
+        "runsScored": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        }
+      }
+    },
+    "LineupSetPayload": {
+      "type": "object",
+      "required": [
+        "team",
+        "battingOrder"
+      ],
+      "properties": {
+        "team": {
+          "$ref": "#/$defs/teamSide"
+        },
+        "battingOrder": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": [
+              "player",
+              "position"
+            ],
+            "properties": {
+              "player": {
+                "$ref": "#/$defs/uuid"
+              },
+              "position": {
+                "$ref": "#/$defs/fieldingPosition"
+              }
+            }
+          }
+        },
+        "pitcher": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "NotePayload": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    "PitchPayload": {
+      "type": "object",
+      "required": [
+        "pitchNo",
+        "batter",
+        "pitcher",
+        "count",
+        "call"
+      ],
+      "properties": {
+        "pitchNo": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "batter": {
+          "$ref": "#/$defs/uuid"
+        },
+        "pitcher": {
+          "$ref": "#/$defs/uuid"
+        },
+        "count": {
+          "$ref": "#/$defs/count"
+        },
+        "call": {
+          "type": "string",
+          "enum": [
+            "B",
+            "C",
+            "S",
+            "F",
+            "T",
+            "X",
+            "P",
+            "Q"
+          ],
+          "description": "Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout."
+        },
+        "pitchType": {
+          "type": "string",
+          "maxLength": 8,
+          "description": "Free-form pitch classification (FF, SL, CU, CH...). Stored verbatim; no vocabulary is enforced in v1."
+        },
+        "trackRef": {
+          "$ref": "#/$defs/uuid"
+        }
+      }
+    },
+    "RunnerPayload": {
+      "type": "object",
+      "required": [
+        "player",
+        "from",
+        "to",
+        "kind",
+        "out"
+      ],
+      "properties": {
+        "player": {
+          "$ref": "#/$defs/uuid"
+        },
+        "from": {
+          "type": "string",
+          "enum": [
+            "1",
+            "2",
+            "3"
+          ]
+        },
+        "to": {
+          "type": "string",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "H"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "steal",
+            "caught_stealing",
+            "pickoff",
+            "wild_pitch",
+            "passed_ball",
+            "balk",
+            "other"
+          ]
+        },
+        "out": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SubstitutionPayload": {
+      "type": "object",
+      "required": [
+        "team",
+        "playerIn",
+        "playerOut",
+        "position",
+        "battingSlot"
+      ],
+      "properties": {
+        "team": {
+          "$ref": "#/$defs/teamSide"
+        },
+        "playerIn": {
+          "$ref": "#/$defs/uuid"
+        },
+        "playerOut": {
+          "$ref": "#/$defs/uuid"
+        },
+        "position": {
+          "$ref": "#/$defs/fieldingPosition"
+        },
+        "battingSlot": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "injury",
+            "tactical",
+            "pitch_count",
+            "other"
+          ]
+        }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "description": "Who or what produced an event.",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Producer's confidence. Human assertions are 1. Estimated or measured values are lower."
+    },
+    "count": {
+      "type": "object",
+      "description": "Ball-strike count at the moment the event was recorded.",
+      "required": [
+        "balls",
+        "strikes"
+      ],
+      "properties": {
+        "balls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "strikes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        }
+      }
+    },
+    "fieldingPosition": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "DH",
+        "PH",
+        "PR"
+      ],
+      "description": "Scorekeeping position codes: 1 pitcher, 2 catcher, 3 first base, 4 second base, 5 third base, 6 shortstop, 7 left field, 8 center field, 9 right field; DH/PH/PR for designated hitter, pinch hitter, pinch runner."
+    },
+    "halfInning": {
+      "type": "string",
+      "enum": [
+        "top",
+        "bottom"
+      ]
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "home",
+        "away"
+      ],
+      "properties": {
+        "home": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "human",
+        "sim",
+        "vision",
+        "import"
+      ],
+      "description": "Where the data came from. Drives the authority rules in the whitepaper (7.2)."
+    },
+    "teamSide": {
+      "type": "string",
+      "enum": [
+        "home",
+        "away"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp with an explicit offset. UTC (Z) is preferred."
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "UUIDv7: time-ordered, lowercase, RFC 9562. v4 identifiers are rejected on purpose so that the log stays sortable by creation time."
+    }
+  }
+}

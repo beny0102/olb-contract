@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:olb:v1:common",
+  "title": "Common definitions",
+  "description": "Shared value objects for the Open League Baseball wire contract. Every other schema references these by $defs name.",
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "description": "Who or what produced an event.",
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "bases": {
+      "type": "object",
+      "description": "Runner occupancy. null means empty.",
+      "required": [
+        "first",
+        "second",
+        "third"
+      ],
+      "properties": {
+        "first": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "second": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "third": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Producer's confidence. Human assertions are 1. Estimated or measured values are lower."
+    },
+    "count": {
+      "type": "object",
+      "description": "Ball-strike count at the moment the event was recorded.",
+      "required": [
+        "balls",
+        "strikes"
+      ],
+      "properties": {
+        "balls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "strikes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        }
+      }
+    },
+    "fieldingPosition": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "DH",
+        "PH",
+        "PR"
+      ],
+      "description": "Scorekeeping position codes: 1 pitcher, 2 catcher, 3 first base, 4 second base, 5 third base, 6 shortstop, 7 left field, 8 center field, 9 right field; DH/PH/PR for designated hitter, pinch hitter, pinch runner."
+    },
+    "gameState": {
+      "type": "object",
+      "description": "Derived game state, as sent in a realtime snapshot. This is a projection of the event log, never an input.",
+      "required": [
+        "status",
+        "inning",
+        "half",
+        "outs",
+        "count",
+        "bases",
+        "score",
+        "battingTeam",
+        "lastSeq"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "scheduled",
+            "live",
+            "final",
+            "suspended",
+            "forfeit"
+          ]
+        },
+        "inning": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "half": {
+          "$ref": "#/$defs/halfInning"
+        },
+        "outs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "count": {
+          "$ref": "#/$defs/count"
+        },
+        "bases": {
+          "$ref": "#/$defs/bases"
+        },
+        "score": {
+          "$ref": "#/$defs/score"
+        },
+        "battingTeam": {
+          "$ref": "#/$defs/teamSide"
+        },
+        "lastSeq": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "halfInning": {
+      "type": "string",
+      "enum": [
+        "top",
+        "bottom"
+      ]
+    },
+    "nonNegativeVec3": {
+      "type": "array",
+      "description": "Per-axis uncertainty in metres. Non-negative.",
+      "items": {
+        "type": "number",
+        "minimum": 0
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "home",
+        "away"
+      ],
+      "properties": {
+        "home": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "human",
+        "sim",
+        "vision",
+        "import"
+      ],
+      "description": "Where the data came from. Drives the authority rules in the whitepaper (7.2)."
+    },
+    "teamSide": {
+      "type": "string",
+      "enum": [
+        "home",
+        "away"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp with an explicit offset. UTC (Z) is preferred."
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "description": "UUIDv7: time-ordered, lowercase, RFC 9562. v4 identifiers are rejected on purpose so that the log stays sortable by creation time."
+    },
+    "vec3": {
+      "type": "array",
+      "description": "A point or vector in metres, in the field coordinate system.",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}

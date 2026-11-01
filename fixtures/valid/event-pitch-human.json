@@ -1,0 +1,22 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c31-9a3f-2b1d4e5f6a70",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 148,
+  "occurredAt": "2026-04-11T23:41:07.412Z",
+  "recordedAt": "2026-04-11T23:41:08.119Z",
+  "type": "pitch",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "revisionOf": null,
+  "payload": {
+    "pitchNo": 3,
+    "batter": "0192f3a2-0001-7000-8000-000000000001",
+    "pitcher": "0192f3a2-0001-7000-8000-000000000002",
+    "count": { "balls": 1, "strikes": 2 },
+    "call": "S",
+    "pitchType": "FF",
+    "trackRef": "0192f3a3-0004-7000-8000-000000000003"
+  }
+}

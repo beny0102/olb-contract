@@ -1,0 +1,18 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c33-8a3f-2b1d4e5f6a72",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 150,
+  "occurredAt": "2026-04-11T23:44:02.500Z",
+  "recordedAt": "2026-04-11T23:44:03.001Z",
+  "type": "inning.end",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "inning": 3,
+    "half": "top",
+    "runsScored": 2,
+    "outs": 3
+  }
+}

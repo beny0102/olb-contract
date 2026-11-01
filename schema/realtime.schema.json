@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:olb:v1:realtime",
+  "title": "RealtimeMessage",
+  "description": "The WebSocket envelope. Clients and servers both use it; direction is implied by message type. Every subscriber receives a snapshot before any delta.",
+  "oneOf": [
+    { "$ref": "#/$defs/SubscribeMessage" },
+    { "$ref": "#/$defs/PingMessage" },
+    { "$ref": "#/$defs/SnapshotMessage" },
+    { "$ref": "#/$defs/EventMessage" },
+    { "$ref": "#/$defs/HeartbeatMessage" },
+    { "$ref": "#/$defs/ByeMessage" }
+  ],
+  "$defs": {
+    "SubscribeMessage": {
+      "title": "SubscribeMessage",
+      "type": "object",
+      "required": ["type", "gameId"],
+      "properties": {
+        "type": { "const": "subscribe" },
+        "gameId": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "fromSeq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Resume point. If the sequence has been evicted from the ring buffer, the server answers with a snapshot instead."
+        }
+      }
+    },
+    "PingMessage": {
+      "title": "PingMessage",
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "const": "ping" } }
+    },
+    "SnapshotMessage": {
+      "title": "SnapshotMessage",
+      "type": "object",
+      "required": ["type", "gameId", "seq", "state"],
+      "properties": {
+        "type": { "const": "snapshot" },
+        "gameId": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "state": { "$ref": "urn:olb:v1:common#/$defs/gameState" }
+      }
+    },
+    "EventMessage": {
+      "title": "EventMessage",
+      "type": "object",
+      "required": ["type", "gameId", "seq", "event"],
+      "properties": {
+        "type": { "const": "event" },
+        "gameId": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "seq": { "type": "integer", "minimum": 0 },
+        "event": { "$ref": "urn:olb:v1:event" }
+      }
+    },
+    "HeartbeatMessage": {
+      "title": "HeartbeatMessage",
+      "type": "object",
+      "required": ["type", "serverTime"],
+      "properties": {
+        "type": { "const": "heartbeat" },
+        "serverTime": { "$ref": "urn:olb:v1:common#/$defs/timestamp" }
+      }
+    },
+    "ByeMessage": {
+      "title": "ByeMessage",
+      "type": "object",
+      "required": ["type", "reason"],
+      "properties": {
+        "type": { "const": "bye" },
+        "reason": {
+          "type": "string",
+          "enum": ["backpressure", "server_shutdown", "game_finished", "slow_client", "error"],
+          "description": "Sent before the server closes a connection. A slow client is dropped rather than buffered unboundedly."
+        }
+      }
+    }
+  }
+}

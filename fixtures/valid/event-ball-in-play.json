@@ -1,0 +1,31 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c32-9a3f-2b1d4e5f6a71",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 149,
+  "occurredAt": "2026-04-11T23:41:12.008Z",
+  "recordedAt": "2026-04-11T23:41:13.240Z",
+  "type": "ball_in_play",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "batter": "0192f3a2-0001-7000-8000-000000000001",
+    "code": "D7/L",
+    "description": "Double to left, line drive",
+    "fielders": [
+      { "player": "0192f3a2-0003-7000-8000-000000000021", "position": "7", "role": "putout" }
+    ],
+    "runsBattedIn": 1,
+    "runnersAdvanced": [
+      {
+        "player": "0192f3a2-0002-7000-8000-000000000011",
+        "from": "1",
+        "to": "3",
+        "on": "hit"
+      }
+    ],
+    "trackRef": "0192f3a3-0004-7000-8000-000000000003",
+    "raw": "D7/L"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "contract": "olb.track/1",
+  "id": "0192f3a3-0004-7000-8000-000000000003",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "kind": "pitch",
+  "source": "vision",
+  "clock": {
+    "type": "ntp",
+    "epoch": "2026-04-11T23:41:06.000Z",
+    "rate": 120,
+    "syncErrorMs": 1.2
+  },
+  "frame": "field",
+  "samples": [
+    { "t": 0.0, "p": [0.31, 1.42, 1.52], "sigma": [0.012, 0.018, 0.015] },
+    { "t": 0.0167, "p": [0.29, 1.71, 1.48], "sigma": [0.012, 0.018, 0.015] },
+    { "t": 0.0333, "p": [0.27, 2.0, 1.44], "sigma": [0.012, 0.018, 0.015] }
+  ],
+  "fit": {
+    "model": "constant-accel-v1",
+    "release": [0.31, 1.42, 1.52],
+    "plate": [-0.08, 0.41, 0.74],
+    "speedMph": 91.4,
+    "spinRpm": 2240,
+    "breakIn": 0.11,
+    "breakVert": 0.42
+  },
+  "model": { "name": "olb-ball-yolo", "version": "0.3.1" },
+  "quality": { "rms": 0.012, "inliers": 41, "cameras": 2, "calibrationId": "cal-2026-04-11-a" }
+}

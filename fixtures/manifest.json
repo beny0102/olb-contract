@@ -1,0 +1,19 @@
+{
+  "comment": "Every fixture is validated in CI. `valid` must match; `invalid` must be rejected; `forward` must match, proving that unknown fields from a newer producer are accepted (whitepaper 5.8, rule 4).",
+  "valid": [
+    { "file": "event-pitch-human.json", "schema": "event" },
+    { "file": "event-ball-in-play.json", "schema": "event" },
+    { "file": "event-inning-end.json", "schema": "event" },
+    { "file": "track-pitch-vision.json", "schema": "track" },
+    { "file": "realtime-subscribe.json", "schema": "realtime" },
+    { "file": "realtime-snapshot.json", "schema": "realtime" }
+  ],
+  "invalid": [
+    { "file": "event-bad-pitch-call.json", "schema": "event" },
+    { "file": "track-missing-sigma.json", "schema": "track" },
+    { "file": "realtime-unknown-type.json", "schema": "realtime" }
+  ],
+  "forward": [
+    { "file": "event-future-field.json", "schema": "event" }
+  ]
+}
