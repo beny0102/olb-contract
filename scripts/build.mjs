@@ -84,7 +84,6 @@ async function main() {
     const types = await compile(bundled, bundled.title ?? entry.name, {
       bannerComment: `/*\n * ${GENERATED_HEADER.replace(/\n/g, "\n * ")} */`,
       style: { singleQuote: false, bracketSpacing: true },
-      declareExternallyReferenced: false,
       enableConstEnums: true,
       format: true,
     });

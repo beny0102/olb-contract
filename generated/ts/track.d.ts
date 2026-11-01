@@ -4,6 +4,30 @@
  *  */
 
 /**
+ * UUIDv7: time-ordered, lowercase, RFC 9562. v4 identifiers are rejected on purpose so that the log stays sortable by creation time.
+ */
+export type Uuid = string;
+/**
+ * RFC 3339 timestamp with an explicit offset. UTC (Z) is preferred.
+ */
+export type Timestamp = string;
+/**
+ * A point or vector in metres, in the field coordinate system.
+ *
+ * @minItems 3
+ * @maxItems 3
+ */
+export type Vec3 = [number, number, number];
+/**
+ * Per-axis uncertainty in metres. Non-negative.
+ *
+ * @minItems 3
+ * @maxItems 3
+ */
+export type NonNegativeVec3 = [number, number, number];
+export type Semver = string;
+
+/**
  * Spatial telemetry for one object over one contiguous time window. Tracks are referenced by events and never rewrite them. Only the pitch kind is in scope for v1.
  */
 export interface Track {
