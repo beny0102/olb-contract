@@ -15,6 +15,10 @@ export type Uuid = string;
 export type HalfInning = "top" | "bottom";
 export type TeamSide = "home" | "away";
 /**
+ * Scorekeeping position codes: 1 pitcher, 2 catcher, 3 first base, 4 second base, 5 third base, 6 shortstop, 7 left field, 8 center field, 9 right field; DH/PH/PR for designated hitter, pinch hitter, pinch runner.
+ */
+export type FieldingPosition = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "DH" | "PH" | "PR";
+/**
  * One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.
  */
 export type Event =
@@ -28,7 +32,11 @@ export type Event =
   | InningEndEvent
   | DiscrepancyEvent
   | AmendmentEvent
-  | NoteEvent;
+  | NoteEvent
+  | InterferenceEvent
+  | EjectionEvent
+  | GameSuspendEvent
+  | GameResumeEvent;
 export type GameStartEvent = Event__Envelope & {
   type: "game.start";
   payload: Event__GameStartPayload;
@@ -56,10 +64,6 @@ export type LineupSetEvent = Event__Envelope & {
   payload: Event__LineupSetPayload;
   [k: string]: unknown;
 };
-/**
- * Scorekeeping position codes: 1 pitcher, 2 catcher, 3 first base, 4 second base, 5 third base, 6 shortstop, 7 left field, 8 center field, 9 right field; DH/PH/PR for designated hitter, pinch hitter, pinch runner.
- */
-export type FieldingPosition = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "DH" | "PH" | "PR";
 export type SubstitutionEvent = Event__Envelope & {
   type: "substitution";
   payload: Event__SubstitutionPayload;
@@ -80,6 +84,14 @@ export type RunnerEvent = Event__Envelope & {
   payload: Event__RunnerPayload;
   [k: string]: unknown;
 };
+export type Event__RunnerPayload = {
+  player: Uuid;
+  from: "1" | "2" | "3" | "bench";
+  to: "1" | "2" | "3" | "H";
+  kind: "steal" | "caught_stealing" | "pickoff" | "wild_pitch" | "passed_ball" | "balk" | "placed" | "other";
+  out: boolean;
+  [k: string]: unknown;
+};
 export type InningEndEvent = Event__Envelope & {
   type: "inning.end";
   payload: Event__InningEndPayload;
@@ -98,6 +110,26 @@ export type AmendmentEvent = Event__Envelope & {
 export type NoteEvent = Event__Envelope & {
   type: "note";
   payload: Event__NotePayload;
+  [k: string]: unknown;
+};
+export type InterferenceEvent = Event__Envelope & {
+  type: "interference";
+  payload: Event__InterferencePayload;
+  [k: string]: unknown;
+};
+export type EjectionEvent = Event__Envelope & {
+  type: "ejection";
+  payload: Event__EjectionPayload;
+  [k: string]: unknown;
+};
+export type GameSuspendEvent = Event__Envelope & {
+  type: "game.suspend";
+  payload: Event__GameSuspendPayload;
+  [k: string]: unknown;
+};
+export type GameResumeEvent = Event__Envelope & {
+  type: "game.resume";
+  payload: Event__GameResumePayload;
   [k: string]: unknown;
 };
 
@@ -134,6 +166,26 @@ export interface GameState {
   score: Score;
   battingTeam: TeamSide;
   lastSeq: number;
+  lineups?: {
+    home: LineupState;
+    away: LineupState;
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Player currently at bat, when the batting order identifies one.
+   */
+  batter?: Uuid | null;
+  /**
+   * Player currently pitching for the fielding side.
+   */
+  pitcher?: Uuid | null;
+  /**
+   * Pitches thrown per player UUID. Updated by every pitch event.
+   */
+  pitchCounts?: {
+    [k: string]: number;
+  };
+  rules?: RulesProfile | null;
   [k: string]: unknown;
 }
 /**
@@ -156,6 +208,32 @@ export interface Bases {
 export interface Score {
   home: number;
   away: number;
+  [k: string]: unknown;
+}
+/**
+ * One side's batting order and current pitcher as folded from lineup.set and substitution.
+ */
+export interface LineupState {
+  battingOrder: {
+    player: Uuid;
+    position: FieldingPosition;
+    [k: string]: unknown;
+  }[];
+  pitcher?: Uuid;
+  dh?: boolean;
+  [k: string]: unknown;
+}
+/**
+ * Game-specific playing rules pinned by game.start.
+ */
+export interface RulesProfile {
+  innings?: number;
+  mercy?: boolean;
+  inningLimit?: number | null;
+  dh?: boolean;
+  courtesyRunner?: boolean;
+  pitchLimit?: number | null;
+  extraInningsPlacedRunner?: boolean;
   [k: string]: unknown;
 }
 export interface EventMessage {
@@ -321,6 +399,7 @@ export interface Event__GameStartPayload {
         }
       ];
   startedAt?: Timestamp;
+  rules?: RulesProfile;
   [k: string]: unknown;
 }
 export interface Event__GameEndPayload {
@@ -554,6 +633,10 @@ export interface Event__LineupSetPayload {
         }
       ];
   pitcher?: Uuid;
+  /**
+   * True when the side bats with a designated hitter.
+   */
+  dh?: boolean;
   [k: string]: unknown;
 }
 export interface Event__SubstitutionPayload {
@@ -562,7 +645,11 @@ export interface Event__SubstitutionPayload {
   playerOut: Uuid;
   position: FieldingPosition;
   battingSlot: number;
-  reason?: "injury" | "tactical" | "pitch_count" | "other";
+  reason?: "injury" | "tactical" | "pitch_count" | "courtesy" | "reentry" | "other";
+  /**
+   * Marks a re-entry into the same batting slot. Complements reason `reentry`.
+   */
+  reentry?: boolean;
   [k: string]: unknown;
 }
 export interface Event__PitchPayload {
@@ -571,9 +658,9 @@ export interface Event__PitchPayload {
   pitcher: Uuid;
   count: Count;
   /**
-   * Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout.
+   * Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout, hit by pitch, intentional ball.
    */
-  call: "B" | "C" | "S" | "F" | "T" | "X" | "P" | "Q";
+  call: "B" | "C" | "S" | "F" | "T" | "X" | "P" | "Q" | "H" | "I";
   /**
    * Free-form pitch classification (FF, SL, CU, CH...). Stored verbatim; no vocabulary is enforced in v1.
    */
@@ -972,14 +1059,6 @@ export interface Event__BallInPlayPayload {
   raw?: string;
   [k: string]: unknown;
 }
-export interface Event__RunnerPayload {
-  player: Uuid;
-  from: "1" | "2" | "3";
-  to: "1" | "2" | "3" | "H";
-  kind: "steal" | "caught_stealing" | "pickoff" | "wild_pitch" | "passed_ball" | "balk" | "other";
-  out: boolean;
-  [k: string]: unknown;
-}
 export interface Event__InningEndPayload {
   inning: number;
   half: HalfInning;
@@ -1020,6 +1099,34 @@ export interface Event__NotePayload {
     | [string, string, string, string, string, string, string, string]
     | [string, string, string, string, string, string, string, string, string]
     | [string, string, string, string, string, string, string, string, string, string];
+  [k: string]: unknown;
+}
+/**
+ * Batter interference that awards first base and advances forced runners.
+ */
+export interface Event__InterferencePayload {
+  batter: Uuid;
+  kind: "catcher" | "obstruction" | "other";
+  fielder?: Uuid;
+  description?: string;
+  [k: string]: unknown;
+}
+/**
+ * Removes a person from the game. Audit only; the fold does not change state.
+ */
+export interface Event__EjectionPayload {
+  person: Uuid;
+  role: "player" | "coach" | "manager" | "umpire" | "other";
+  reason: string;
+  [k: string]: unknown;
+}
+export interface Event__GameSuspendPayload {
+  reason: string;
+  at?: Timestamp;
+  [k: string]: unknown;
+}
+export interface Event__GameResumePayload {
+  at?: Timestamp;
   [k: string]: unknown;
 }
 export interface HeartbeatMessage {

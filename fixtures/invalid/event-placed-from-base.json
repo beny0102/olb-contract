@@ -1,0 +1,19 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c47-9a3f-2b1d4e5f6a87",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 160,
+  "occurredAt": "2026-04-12T00:22:00.000Z",
+  "recordedAt": "2026-04-12T00:22:01.000Z",
+  "type": "runner",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "player": "0192f3a2-0002-7000-8000-000000000011",
+    "from": "1",
+    "to": "2",
+    "kind": "placed",
+    "out": false
+  }
+}

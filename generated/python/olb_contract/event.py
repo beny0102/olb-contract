@@ -74,6 +74,14 @@ class DiscrepancyPayload(BaseModel):
     resolution: str | None = Field(None, max_length=500)
 
 
+class Role1(StrEnum):
+    player = 'player'
+    coach = 'coach'
+    manager = 'manager'
+    umpire = 'umpire'
+    other = 'other'
+
+
 class Reason1(StrEnum):
     completed = 'completed'
     forfeit = 'forfeit'
@@ -89,7 +97,7 @@ class FieldCondition(StrEnum):
     unknown = 'unknown'
 
 
-class Role1(StrEnum):
+class Role2(StrEnum):
     plate = 'plate'
     first = 'first'
     second = 'second'
@@ -100,7 +108,13 @@ class Role1(StrEnum):
 
 class Umpire(BaseModel):
     name: str = Field(..., max_length=120)
-    role: Role1 | None = None
+    role: Role2 | None = None
+
+
+class Kind(StrEnum):
+    catcher = 'catcher'
+    obstruction = 'obstruction'
+    other = 'other'
 
 
 class Tag(RootModel[str]):
@@ -114,7 +128,7 @@ class NotePayload(BaseModel):
 
 class Call(StrEnum):
     """
-    Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout.
+    Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout, hit by pitch, intentional ball.
     """
 
     B = 'B'
@@ -125,12 +139,37 @@ class Call(StrEnum):
     X = 'X'
     P = 'P'
     Q = 'Q'
+    H = 'H'
+    I = 'I'
+
+
+class InningLimit(RootModel[int]):
+    root: int = Field(..., ge=1)
+
+
+class PitchLimit(RootModel[int]):
+    root: int = Field(..., ge=0)
+
+
+class RulesProfile(BaseModel):
+    """
+    Game-specific playing rules pinned by game.start.
+    """
+
+    innings: int | None = Field(None, ge=1, le=12)
+    mercy: bool | None = None
+    inningLimit: InningLimit | None = None
+    dh: bool | None = None
+    courtesyRunner: bool | None = None
+    pitchLimit: PitchLimit | None = None
+    extraInningsPlacedRunner: bool | None = None
 
 
 class From1(StrEnum):
     field_1 = '1'
     field_2 = '2'
     field_3 = '3'
+    bench = 'bench'
 
 
 class To1(StrEnum):
@@ -140,13 +179,14 @@ class To1(StrEnum):
     H = 'H'
 
 
-class Kind(StrEnum):
+class Kind1(StrEnum):
     steal = 'steal'
     caught_stealing = 'caught_stealing'
     pickoff = 'pickoff'
     wild_pitch = 'wild_pitch'
     passed_ball = 'passed_ball'
     balk = 'balk'
+    placed = 'placed'
     other = 'other'
 
 
@@ -154,10 +194,12 @@ class Reason2(StrEnum):
     injury = 'injury'
     tactical = 'tactical'
     pitch_count = 'pitch_count'
+    courtesy = 'courtesy'
+    reentry = 'reentry'
     other = 'other'
 
 
-class Kind1(StrEnum):
+class Kind2(StrEnum):
     user = 'user'
     service = 'service'
     system = 'system'
@@ -168,7 +210,7 @@ class Actor(BaseModel):
     Who or what produced an event.
     """
 
-    kind: Kind1
+    kind: Kind2
     id: str = Field(..., max_length=128, min_length=1)
 
 
@@ -283,6 +325,16 @@ class BallInPlayPayload(BaseModel):
     )
 
 
+class EjectionPayload(BaseModel):
+    """
+    Removes a person from the game. Audit only; the fold does not change state.
+    """
+
+    person: Uuid
+    role: Role1
+    reason: str = Field(..., max_length=500, min_length=1)
+
+
 class Envelope(BaseModel):
     """
     Fields present on every event, regardless of type.
@@ -312,11 +364,21 @@ class GameEndPayload(BaseModel):
     finalScore: Score
 
 
+class GameResumePayload(BaseModel):
+    at: Timestamp | None = None
+
+
 class GameStartPayload(BaseModel):
     venue: str | None = Field(None, max_length=200)
     fieldCondition: FieldCondition | None = None
     umpires: list[Umpire] | None = Field(None, max_length=6)
     startedAt: Timestamp | None = None
+    rules: RulesProfile | None = None
+
+
+class GameSuspendPayload(BaseModel):
+    reason: str = Field(..., max_length=500, min_length=1)
+    at: Timestamp | None = None
 
 
 class InningEndPayload(BaseModel):
@@ -324,6 +386,17 @@ class InningEndPayload(BaseModel):
     half: HalfInning
     runsScored: int = Field(..., ge=0)
     outs: int = Field(..., ge=1, le=3)
+
+
+class InterferencePayload(BaseModel):
+    """
+    Batter interference that awards first base and advances forced runners.
+    """
+
+    batter: Uuid
+    kind: Kind
+    fielder: Uuid | None = None
+    description: str | None = Field(None, max_length=500)
 
 
 class BattingOrderItem(BaseModel):
@@ -335,6 +408,9 @@ class LineupSetPayload(BaseModel):
     team: TeamSide
     battingOrder: list[BattingOrderItem] = Field(..., max_length=12, min_length=9)
     pitcher: Uuid | None = None
+    dh: bool | None = Field(
+        None, description='True when the side bats with a designated hitter.'
+    )
 
 
 class PitchPayload(BaseModel):
@@ -344,7 +420,7 @@ class PitchPayload(BaseModel):
     count: Count
     call: Call = Field(
         ...,
-        description='Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout.',
+        description='Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout, hit by pitch, intentional ball.',
     )
     pitchType: str | None = Field(
         None,
@@ -358,7 +434,7 @@ class RunnerPayload(BaseModel):
     player: Uuid
     from_: From1 = Field(..., alias='from')
     to: To1
-    kind: Kind
+    kind: Kind1
     out: bool
 
 
@@ -369,6 +445,10 @@ class SubstitutionPayload(BaseModel):
     position: FieldingPosition
     battingSlot: int = Field(..., ge=1, le=12)
     reason: Reason2 | None = None
+    reentry: bool | None = Field(
+        None,
+        description='Marks a re-entry into the same batting slot. Complements reason `reentry`.',
+    )
 
 
 class GameStartEvent(Envelope):
@@ -470,6 +550,42 @@ class NoteEvent(Envelope):
     payload: NotePayload
 
 
+class InterferenceEvent(Envelope):
+    """
+    One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.
+    """
+
+    type: Literal['interference']
+    payload: InterferencePayload
+
+
+class EjectionEvent(Envelope):
+    """
+    One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.
+    """
+
+    type: Literal['ejection']
+    payload: EjectionPayload
+
+
+class GameSuspendEvent(Envelope):
+    """
+    One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.
+    """
+
+    type: Literal['game.suspend']
+    payload: GameSuspendPayload
+
+
+class GameResumeEvent(Envelope):
+    """
+    One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.
+    """
+
+    type: Literal['game.resume']
+    payload: GameResumePayload
+
+
 class Event(
     RootModel[
         GameStartEvent
@@ -483,6 +599,10 @@ class Event(
         | DiscrepancyEvent
         | AmendmentEvent
         | NoteEvent
+        | InterferenceEvent
+        | EjectionEvent
+        | GameSuspendEvent
+        | GameResumeEvent
     ]
 ):
     root: (
@@ -497,6 +617,10 @@ class Event(
         | DiscrepancyEvent
         | AmendmentEvent
         | NoteEvent
+        | InterferenceEvent
+        | EjectionEvent
+        | GameSuspendEvent
+        | GameResumeEvent
     ) = Field(
         ...,
         description="One entry in a game's append-only event log. The union is discriminated by `type`; envelope fields are shared by every branch.",

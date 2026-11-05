@@ -124,6 +124,50 @@
           "required": ["type", "payload"]
         }
       ]
+    },
+    {
+      "title": "InterferenceEvent",
+      "allOf": [
+        { "$ref": "#/$defs/Envelope" },
+        {
+          "type": "object",
+          "properties": { "type": { "const": "interference" }, "payload": { "$ref": "#/$defs/InterferencePayload" } },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    {
+      "title": "EjectionEvent",
+      "allOf": [
+        { "$ref": "#/$defs/Envelope" },
+        {
+          "type": "object",
+          "properties": { "type": { "const": "ejection" }, "payload": { "$ref": "#/$defs/EjectionPayload" } },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    {
+      "title": "GameSuspendEvent",
+      "allOf": [
+        { "$ref": "#/$defs/Envelope" },
+        {
+          "type": "object",
+          "properties": { "type": { "const": "game.suspend" }, "payload": { "$ref": "#/$defs/GameSuspendPayload" } },
+          "required": ["type", "payload"]
+        }
+      ]
+    },
+    {
+      "title": "GameResumeEvent",
+      "allOf": [
+        { "$ref": "#/$defs/Envelope" },
+        {
+          "type": "object",
+          "properties": { "type": { "const": "game.resume" }, "payload": { "$ref": "#/$defs/GameResumePayload" } },
+          "required": ["type", "payload"]
+        }
+      ]
     }
   ],
   "$defs": {
@@ -169,7 +213,8 @@
             }
           }
         },
-        "startedAt": { "$ref": "urn:olb:v1:common#/$defs/timestamp" }
+        "startedAt": { "$ref": "urn:olb:v1:common#/$defs/timestamp" },
+        "rules": { "$ref": "urn:olb:v1:common#/$defs/RulesProfile" }
       }
     },
 
@@ -200,7 +245,8 @@
             }
           }
         },
-        "pitcher": { "$ref": "urn:olb:v1:common#/$defs/uuid" }
+        "pitcher": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "dh": { "type": "boolean", "description": "True when the side bats with a designated hitter." }
       }
     },
 
@@ -213,7 +259,11 @@
         "playerOut": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
         "position": { "$ref": "urn:olb:v1:common#/$defs/fieldingPosition" },
         "battingSlot": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "reason": { "type": "string", "enum": ["injury", "tactical", "pitch_count", "other"] }
+        "reason": { "type": "string", "enum": ["injury", "tactical", "pitch_count", "courtesy", "reentry", "other"] },
+        "reentry": {
+          "type": "boolean",
+          "description": "Marks a re-entry into the same batting slot. Complements reason `reentry`."
+        }
       }
     },
 
@@ -227,8 +277,8 @@
         "count": { "$ref": "urn:olb:v1:common#/$defs/count" },
         "call": {
           "type": "string",
-          "enum": ["B", "C", "S", "F", "T", "X", "P", "Q"],
-          "description": "Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout."
+          "enum": ["B", "C", "S", "F", "T", "X", "P", "Q", "H", "I"],
+          "description": "Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout, hit by pitch, intentional ball."
         },
         "pitchType": {
           "type": "string",
@@ -289,11 +339,26 @@
       "required": ["player", "from", "to", "kind", "out"],
       "properties": {
         "player": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
-        "from": { "type": "string", "enum": ["1", "2", "3"] },
+        "from": { "type": "string", "enum": ["1", "2", "3", "bench"] },
         "to": { "type": "string", "enum": ["1", "2", "3", "H"] },
-        "kind": { "type": "string", "enum": ["steal", "caught_stealing", "pickoff", "wild_pitch", "passed_ball", "balk", "other"] },
+        "kind": { "type": "string", "enum": ["steal", "caught_stealing", "pickoff", "wild_pitch", "passed_ball", "balk", "placed", "other"] },
         "out": { "type": "boolean" }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "placed" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "from": { "const": "bench" },
+              "to": { "enum": ["1", "2", "3"] },
+              "out": { "const": false }
+            }
+          }
+        }
+      ]
     },
 
     "InningEndPayload": {
@@ -337,6 +402,45 @@
       "properties": {
         "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
         "tags": { "type": "array", "maxItems": 10, "items": { "type": "string", "maxLength": 40 } }
+      }
+    },
+
+    "InterferencePayload": {
+      "type": "object",
+      "description": "Batter interference that awards first base and advances forced runners.",
+      "required": ["batter", "kind"],
+      "properties": {
+        "batter": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "kind": { "type": "string", "enum": ["catcher", "obstruction", "other"] },
+        "fielder": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "description": { "type": "string", "maxLength": 500 }
+      }
+    },
+
+    "EjectionPayload": {
+      "type": "object",
+      "description": "Removes a person from the game. Audit only; the fold does not change state.",
+      "required": ["person", "role", "reason"],
+      "properties": {
+        "person": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "role": { "type": "string", "enum": ["player", "coach", "manager", "umpire", "other"] },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    },
+
+    "GameSuspendPayload": {
+      "type": "object",
+      "required": ["reason"],
+      "properties": {
+        "reason": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "at": { "$ref": "urn:olb:v1:common#/$defs/timestamp" }
+      }
+    },
+
+    "GameResumePayload": {
+      "type": "object",
+      "properties": {
+        "at": { "$ref": "urn:olb:v1:common#/$defs/timestamp" }
       }
     }
   }

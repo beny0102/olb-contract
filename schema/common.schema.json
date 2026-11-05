@@ -105,7 +105,79 @@
         "bases": { "$ref": "urn:olb:v1:common#/$defs/bases" },
         "score": { "$ref": "urn:olb:v1:common#/$defs/score" },
         "battingTeam": { "$ref": "urn:olb:v1:common#/$defs/teamSide" },
-        "lastSeq": { "type": "integer", "minimum": 0 }
+        "lastSeq": { "type": "integer", "minimum": 0 },
+        "lineups": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "Both sides' batting orders and current pitcher, when the log has set them.",
+              "required": ["home", "away"],
+              "properties": {
+                "home": { "$ref": "urn:olb:v1:common#/$defs/LineupState" },
+                "away": { "$ref": "urn:olb:v1:common#/$defs/LineupState" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "batter": {
+          "anyOf": [{ "$ref": "urn:olb:v1:common#/$defs/uuid" }, { "type": "null" }],
+          "description": "Player currently at bat, when the batting order identifies one."
+        },
+        "pitcher": {
+          "anyOf": [{ "$ref": "urn:olb:v1:common#/$defs/uuid" }, { "type": "null" }],
+          "description": "Player currently pitching for the fielding side."
+        },
+        "pitchCounts": {
+          "type": "object",
+          "description": "Pitches thrown per player UUID. Updated by every pitch event.",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "rules": {
+          "anyOf": [
+            { "$ref": "urn:olb:v1:common#/$defs/RulesProfile" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+
+    "RulesProfile": {
+      "type": "object",
+      "description": "Game-specific playing rules pinned by game.start.",
+      "properties": {
+        "innings": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "mercy": { "type": "boolean" },
+        "inningLimit": {
+          "anyOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+        },
+        "dh": { "type": "boolean" },
+        "courtesyRunner": { "type": "boolean" },
+        "pitchLimit": {
+          "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }]
+        },
+        "extraInningsPlacedRunner": { "type": "boolean" }
+      }
+    },
+
+    "LineupState": {
+      "type": "object",
+      "description": "One side's batting order and current pitcher as folded from lineup.set and substitution.",
+      "required": ["battingOrder"],
+      "properties": {
+        "battingOrder": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["player", "position"],
+            "properties": {
+              "player": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+              "position": { "$ref": "urn:olb:v1:common#/$defs/fieldingPosition" }
+            }
+          }
+        },
+        "pitcher": { "$ref": "urn:olb:v1:common#/$defs/uuid" },
+        "dh": { "type": "boolean" }
       }
     }
   }

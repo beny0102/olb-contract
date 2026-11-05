@@ -1,0 +1,16 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c43-9a3f-2b1d4e5f6a83",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 156,
+  "occurredAt": "2026-04-11T23:48:00.000Z",
+  "recordedAt": "2026-04-11T23:48:01.000Z",
+  "type": "game.suspend",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "reason": "rain",
+    "at": "2026-04-11T23:48:00.000Z"
+  }
+}

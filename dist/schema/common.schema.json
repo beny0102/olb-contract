@@ -4,6 +4,84 @@
   "title": "Common definitions",
   "description": "Shared value objects for the Open League Baseball wire contract. Every other schema references these by $defs name.",
   "$defs": {
+    "LineupState": {
+      "type": "object",
+      "description": "One side's batting order and current pitcher as folded from lineup.set and substitution.",
+      "required": [
+        "battingOrder"
+      ],
+      "properties": {
+        "battingOrder": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "player",
+              "position"
+            ],
+            "properties": {
+              "player": {
+                "$ref": "#/$defs/uuid"
+              },
+              "position": {
+                "$ref": "#/$defs/fieldingPosition"
+              }
+            }
+          }
+        },
+        "pitcher": {
+          "$ref": "#/$defs/uuid"
+        },
+        "dh": {
+          "type": "boolean"
+        }
+      }
+    },
+    "RulesProfile": {
+      "type": "object",
+      "description": "Game-specific playing rules pinned by game.start.",
+      "properties": {
+        "innings": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "mercy": {
+          "type": "boolean"
+        },
+        "inningLimit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dh": {
+          "type": "boolean"
+        },
+        "courtesyRunner": {
+          "type": "boolean"
+        },
+        "pitchLimit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extraInningsPlacedRunner": {
+          "type": "boolean"
+        }
+      }
+    },
     "actor": {
       "type": "object",
       "description": "Who or what produced an event.",
@@ -164,6 +242,69 @@
         "lastSeq": {
           "type": "integer",
           "minimum": 0
+        },
+        "lineups": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "Both sides' batting orders and current pitcher, when the log has set them.",
+              "required": [
+                "home",
+                "away"
+              ],
+              "properties": {
+                "home": {
+                  "$ref": "#/$defs/LineupState"
+                },
+                "away": {
+                  "$ref": "#/$defs/LineupState"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Player currently at bat, when the batting order identifies one."
+        },
+        "pitcher": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Player currently pitching for the fielding side."
+        },
+        "pitchCounts": {
+          "type": "object",
+          "description": "Pitches thrown per player UUID. Updated by every pitch event.",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "rules": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RulesProfile"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },

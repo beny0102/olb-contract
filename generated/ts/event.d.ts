@@ -17,7 +17,11 @@ export type Event =
   | InningEndEvent
   | DiscrepancyEvent
   | AmendmentEvent
-  | NoteEvent;
+  | NoteEvent
+  | InterferenceEvent
+  | EjectionEvent
+  | GameSuspendEvent
+  | GameResumeEvent;
 export type GameStartEvent = Envelope & {
   type: "game.start";
   payload: GameStartPayload;
@@ -74,6 +78,14 @@ export type RunnerEvent = Envelope & {
   payload: RunnerPayload;
   [k: string]: unknown;
 };
+export type RunnerPayload = {
+  player: Uuid;
+  from: "1" | "2" | "3" | "bench";
+  to: "1" | "2" | "3" | "H";
+  kind: "steal" | "caught_stealing" | "pickoff" | "wild_pitch" | "passed_ball" | "balk" | "placed" | "other";
+  out: boolean;
+  [k: string]: unknown;
+};
 export type InningEndEvent = Envelope & {
   type: "inning.end";
   payload: InningEndPayload;
@@ -93,6 +105,26 @@ export type AmendmentEvent = Envelope & {
 export type NoteEvent = Envelope & {
   type: "note";
   payload: NotePayload;
+  [k: string]: unknown;
+};
+export type InterferenceEvent = Envelope & {
+  type: "interference";
+  payload: InterferencePayload;
+  [k: string]: unknown;
+};
+export type EjectionEvent = Envelope & {
+  type: "ejection";
+  payload: EjectionPayload;
+  [k: string]: unknown;
+};
+export type GameSuspendEvent = Envelope & {
+  type: "game.suspend";
+  payload: GameSuspendPayload;
+  [k: string]: unknown;
+};
+export type GameResumeEvent = Envelope & {
+  type: "game.resume";
+  payload: GameResumePayload;
   [k: string]: unknown;
 };
 
@@ -252,6 +284,20 @@ export interface GameStartPayload {
         }
       ];
   startedAt?: Timestamp;
+  rules?: RulesProfile;
+  [k: string]: unknown;
+}
+/**
+ * Game-specific playing rules pinned by game.start.
+ */
+export interface RulesProfile {
+  innings?: number;
+  mercy?: boolean;
+  inningLimit?: number | null;
+  dh?: boolean;
+  courtesyRunner?: boolean;
+  pitchLimit?: number | null;
+  extraInningsPlacedRunner?: boolean;
   [k: string]: unknown;
 }
 export interface GameEndPayload {
@@ -490,6 +536,10 @@ export interface LineupSetPayload {
         }
       ];
   pitcher?: Uuid;
+  /**
+   * True when the side bats with a designated hitter.
+   */
+  dh?: boolean;
   [k: string]: unknown;
 }
 export interface SubstitutionPayload {
@@ -498,7 +548,11 @@ export interface SubstitutionPayload {
   playerOut: Uuid;
   position: FieldingPosition;
   battingSlot: number;
-  reason?: "injury" | "tactical" | "pitch_count" | "other";
+  reason?: "injury" | "tactical" | "pitch_count" | "courtesy" | "reentry" | "other";
+  /**
+   * Marks a re-entry into the same batting slot. Complements reason `reentry`.
+   */
+  reentry?: boolean;
   [k: string]: unknown;
 }
 export interface PitchPayload {
@@ -507,9 +561,9 @@ export interface PitchPayload {
   pitcher: Uuid;
   count: Count;
   /**
-   * Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout.
+   * Retrosheet pitch-sequence subset: ball, called strike, swinging strike, foul, foul tip, in play, pitchout, swinging on pitchout, hit by pitch, intentional ball.
    */
-  call: "B" | "C" | "S" | "F" | "T" | "X" | "P" | "Q";
+  call: "B" | "C" | "S" | "F" | "T" | "X" | "P" | "Q" | "H" | "I";
   /**
    * Free-form pitch classification (FF, SL, CU, CH...). Stored verbatim; no vocabulary is enforced in v1.
    */
@@ -916,14 +970,6 @@ export interface BallInPlayPayload {
   raw?: string;
   [k: string]: unknown;
 }
-export interface RunnerPayload {
-  player: Uuid;
-  from: "1" | "2" | "3";
-  to: "1" | "2" | "3" | "H";
-  kind: "steal" | "caught_stealing" | "pickoff" | "wild_pitch" | "passed_ball" | "balk" | "other";
-  out: boolean;
-  [k: string]: unknown;
-}
 export interface InningEndPayload {
   inning: number;
   half: HalfInning;
@@ -964,5 +1010,33 @@ export interface NotePayload {
     | [string, string, string, string, string, string, string, string]
     | [string, string, string, string, string, string, string, string, string]
     | [string, string, string, string, string, string, string, string, string, string];
+  [k: string]: unknown;
+}
+/**
+ * Batter interference that awards first base and advances forced runners.
+ */
+export interface InterferencePayload {
+  batter: Uuid;
+  kind: "catcher" | "obstruction" | "other";
+  fielder?: Uuid;
+  description?: string;
+  [k: string]: unknown;
+}
+/**
+ * Removes a person from the game. Audit only; the fold does not change state.
+ */
+export interface EjectionPayload {
+  person: Uuid;
+  role: "player" | "coach" | "manager" | "umpire" | "other";
+  reason: string;
+  [k: string]: unknown;
+}
+export interface GameSuspendPayload {
+  reason: string;
+  at?: Timestamp;
+  [k: string]: unknown;
+}
+export interface GameResumePayload {
+  at?: Timestamp;
   [k: string]: unknown;
 }

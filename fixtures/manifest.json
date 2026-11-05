@@ -4,12 +4,20 @@
     { "file": "event-pitch-human.json", "schema": "event" },
     { "file": "event-ball-in-play.json", "schema": "event" },
     { "file": "event-inning-end.json", "schema": "event" },
+    { "file": "event-hit-by-pitch.json", "schema": "event" },
+    { "file": "event-interference.json", "schema": "event" },
+    { "file": "event-substitution.json", "schema": "event" },
+    { "file": "event-game-suspend.json", "schema": "event" },
+    { "file": "event-game-resume.json", "schema": "event" },
+    { "file": "event-placed-runner.json", "schema": "event" },
+    { "file": "event-ejection.json", "schema": "event" },
     { "file": "track-pitch-vision.json", "schema": "track" },
     { "file": "realtime-subscribe.json", "schema": "realtime" },
     { "file": "realtime-snapshot.json", "schema": "realtime" }
   ],
   "invalid": [
     { "file": "event-bad-pitch-call.json", "schema": "event" },
+    { "file": "event-placed-from-base.json", "schema": "event" },
     { "file": "track-missing-sigma.json", "schema": "track" },
     { "file": "realtime-unknown-type.json", "schema": "realtime" }
   ],

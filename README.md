@@ -4,7 +4,7 @@
 
 Every component of the platform — scorekeeper app, league API, vision worker, simulator, viewer — speaks this schema and nothing else. It is the only compatibility surface in the project, which is why it is versioned, published and tested on its own.
 
-> Status: `0.1.0`, alpha. The shapes are stable enough to build against; field-level details may still change before `1.0.0`.
+> Status: `0.2.0`, alpha. The shapes are stable enough to build against; field-level details may still change before `1.0.0`.
 
 ## What is in the box
 
@@ -14,6 +14,27 @@ Every component of the platform — scorekeeper app, league API, vision worker, 
 | `track` | `olb.track/1` | Spatial telemetry for one object over one time window |
 | `realtime` | — | WebSocket envelope: subscribe, snapshot, delta, heartbeat, bye |
 | `common` | — | Shared value objects: UUIDv7, timestamps, vectors, game state |
+
+### Event types
+
+| Type | Meaning |
+| --- | --- |
+| `game.start` / `game.end` | Lifecycle, venue, umpires, optional rules profile, final score |
+| `game.suspend` / `game.resume` | Temporary interruption and continuation |
+| `lineup.set` / `substitution` | Batting order, positions, pitcher, DH, courtesy and re-entry |
+| `pitch` | One pitch: call, count, optional telemetry reference (`H` hit by pitch, `I` intentional ball) |
+| `ball_in_play` | Batted-ball outcome and fielders involved |
+| `runner` | Stolen base, caught stealing, pickoff, advance, or a placed extra-inning runner |
+| `interference` | Batter awarded first base by catcher's interference or obstruction |
+| `ejection` | Audit record that a person left the game; the fold does not change state |
+| `inning.end` | Outs reached, runs scored, side retired |
+| `discrepancy` | A machine/human conflict awaiting review (7.2) |
+| `amendment` | Post-game correction with a reason |
+| `note` | Free-text annotation, never affects state |
+
+The game state projection carries the optional `lineups`, `batter`, `pitcher`,
+`pitchCounts` and `rules` fields. They are additive: a log without them folds
+exactly as it did at `0.1.0`.
 
 Three properties are deliberate and worth knowing before you use it:
 

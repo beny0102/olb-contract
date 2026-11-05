@@ -1,0 +1,21 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c42-9a3f-2b1d4e5f6a82",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 155,
+  "occurredAt": "2026-04-11T23:47:00.000Z",
+  "recordedAt": "2026-04-11T23:47:01.000Z",
+  "type": "substitution",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "team": "home",
+    "playerIn": "0192f3a2-0003-7000-8000-000000000031",
+    "playerOut": "0192f3a2-0003-7000-8000-000000000032",
+    "position": "1",
+    "battingSlot": 9,
+    "reason": "reentry",
+    "reentry": true
+  }
+}

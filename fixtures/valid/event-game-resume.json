@@ -1,0 +1,15 @@
+{
+  "contract": "olb.event/1",
+  "id": "0192f3a1-7c2e-7c44-9a3f-2b1d4e5f6a84",
+  "gameId": "0192f3a0-5b11-7a02-8f3c-1c9d2e3f4a50",
+  "seq": 157,
+  "occurredAt": "2026-04-12T00:20:00.000Z",
+  "recordedAt": "2026-04-12T00:20:01.000Z",
+  "type": "game.resume",
+  "source": "human",
+  "confidence": 1.0,
+  "actor": { "kind": "user", "id": "usr_01HX" },
+  "payload": {
+    "at": "2026-04-12T00:20:00.000Z"
+  }
+}
