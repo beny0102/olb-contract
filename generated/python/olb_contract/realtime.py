@@ -104,6 +104,7 @@ class Role1(StrEnum):
 
 class Reason2(StrEnum):
     completed = 'completed'
+    shortened = 'shortened'
     forfeit = 'forfeit'
     suspended = 'suspended'
     rain = 'rain'

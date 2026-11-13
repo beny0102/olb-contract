@@ -222,7 +222,7 @@
       "type": "object",
       "required": ["reason", "finalScore"],
       "properties": {
-        "reason": { "type": "string", "enum": ["completed", "forfeit", "suspended", "rain", "darkness", "other"] },
+        "reason": { "type": "string", "enum": ["completed", "shortened", "forfeit", "suspended", "rain", "darkness", "other"] },
         "finalScore": { "$ref": "urn:olb:v1:common#/$defs/score" }
       }
     },

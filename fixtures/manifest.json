@@ -9,6 +9,7 @@
     { "file": "event-substitution.json", "schema": "event" },
     { "file": "event-game-suspend.json", "schema": "event" },
     { "file": "event-game-resume.json", "schema": "event" },
+    { "file": "event-game-end-shortened.json", "schema": "event" },
     { "file": "event-placed-runner.json", "schema": "event" },
     { "file": "event-ejection.json", "schema": "event" },
     { "file": "track-pitch-vision.json", "schema": "track" },

@@ -301,7 +301,7 @@ export interface RulesProfile {
   [k: string]: unknown;
 }
 export interface GameEndPayload {
-  reason: "completed" | "forfeit" | "suspended" | "rain" | "darkness" | "other";
+  reason: "completed" | "shortened" | "forfeit" | "suspended" | "rain" | "darkness" | "other";
   finalScore: Score;
   [k: string]: unknown;
 }

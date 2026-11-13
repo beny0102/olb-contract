@@ -403,7 +403,7 @@ export interface Event__GameStartPayload {
   [k: string]: unknown;
 }
 export interface Event__GameEndPayload {
-  reason: "completed" | "forfeit" | "suspended" | "rain" | "darkness" | "other";
+  reason: "completed" | "shortened" | "forfeit" | "suspended" | "rain" | "darkness" | "other";
   finalScore: Score;
   [k: string]: unknown;
 }

@@ -32,6 +32,8 @@ Every component of the platform — scorekeeper app, league API, vision worker, 
 | `amendment` | Post-game correction with a reason |
 | `note` | Free-text annotation, never affects state |
 
+A `game.end` with `reason: "shortened"` is a final game that ended before the regulation distance (rain, darkness, mercy, curfew, etc.); its `finalScore` stands.
+
 The game state projection carries the optional `lineups`, `batter`, `pitcher`,
 `pitchCounts` and `rules` fields. They are additive: a log without them folds
 exactly as it did at `0.1.0`.
